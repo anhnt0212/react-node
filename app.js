@@ -1,33 +1,23 @@
 var express = require('express');
 var routes = require('./routes');
-var tasks = require('./routes/tasks');
 var http = require('http');
 var path = require('path');
 var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://localhost:27017/react-node?auto_reconnect', {safe: true});
 var app = express();
 
-var favicon = require('serve-favicon'),
-    logger = require('morgan'),
+var logger = require('morgan'),
     bodyParser = require('body-parser'),
     methodOverride = require('method-override'),
     cookieParser = require('cookie-parser'),
     session = require('express-session'),
     csrf = require('csurf'),
     errorHandler = require('errorhandler');
-
-app.use(function (req, res, next) {
-    req.db = {};
-    req.db.tasks = db.collection('tasks');
-    next();
-})
-app.locals.appname = 'Express.js Todo App'
 app.locals.moment = require('moment');
 
 app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
-app.use(favicon(path.join('public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
