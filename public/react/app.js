@@ -32,5 +32,4 @@ ReactDOM.render(
     <div>
         <Contacts name="fullName" data="web developer" age="22"/>
     </div>
-
     , document.getElementById('root'));
