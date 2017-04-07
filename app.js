@@ -15,7 +15,7 @@ var logger = require('morgan'),
     errorHandler = require('errorhandler');
 app.locals.moment = require('moment');
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 3001);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(logger('dev'));

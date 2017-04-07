@@ -1,9 +1,36 @@
-
 var Contacts = React.createClass({
+    totalAge : function () {
+        this.state.personAge  =  this.state.personAge + 1;
+        this.setState(this.state);
+    },
+    getInitialState (){
+        return {personAge:parseInt(this.props.age)}
+    },
     render: function () {
         return (
-            <h1 className="title">Anh Nguyen</h1>
+            <div>
+                <h1 className="title">Anh Nguyen</h1>
+                <br />
+                <div>Total Age :  {this.state.personAge}</div>
+                <button onClick={()=>{this.totalAge()}}>CHECK AGE</button>
+            </div>
+        );
+    },
+});
+
+var InputTag = React.createClass({
+    render : function () {
+        return (
+            <div>
+
+            </div>
         );
     }
 });
-ReactDOM.render(<Contacts />,document.getElementById('root'));
+
+ReactDOM.render(
+    <div>
+        <Contacts name="fullName" data="web developer" age="22"/>
+    </div>
+
+    , document.getElementById('root'));
