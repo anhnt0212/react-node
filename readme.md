@@ -1,10 +1,6 @@
-> Todo app with Express.js
+# Todo
 
-## Install express
- ``` npm install express ```
-## Install nodemon
- ``` npm install nodemon ```
-## Run
- ``` npm start ``` or ``` node app.js ```
- 
-open ```http://localhost:3000```
+* Markdown
+* Edit post (modal, fetch data via ajax)
+* Photo upload
+* salt password

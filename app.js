@@ -1,49 +1,134 @@
-var express = require('express');
-var routes = require('./routes');
-var http = require('http');
-var path = require('path');
-var mongoskin = require('mongoskin');
-var db = mongoskin.db('mongodb://localhost:27017/react-node?auto_reconnect', {safe: true});
-var app = express();
+var TWITTER_CONSUMER_KEY = process.env.TWITTER_CONSUMER_KEY || 'ABC'
+var TWITTER_CONSUMER_SECRET = process.env.TWITTER_CONSUMER_SECRET || 'XYZXYZ'
 
-var logger = require('morgan'),
-    bodyParser = require('body-parser'),
-    methodOverride = require('method-override'),
-    cookieParser = require('cookie-parser'),
-    session = require('express-session'),
-    csrf = require('csurf'),
-    errorHandler = require('errorhandler');
-app.locals.moment = require('moment');
+var express = require('express'),
+  routes = require('./routes'),
+  http = require('http'),
+  path = require('path'),
+  mongoskin = require('mongoskin'),
+  dbUrl = process.env.MONGOHQ_URL || 'mongodb://@localhost:27017/blog',
+  db = mongoskin.db(dbUrl, {safe: true}),
+  collections = {
+    articles: db.collection('articles'),
+    users: db.collection('users')
+  }
+  everyauth = require('everyauth');
 
-app.set('port', process.env.PORT || 3001);
-app.set('views', __dirname + '/views');
-app.set('view engine', 'ejs');
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(methodOverride());
-app.use(cookieParser('CEAF3FA4-F385-49AA-8FE4-54766A9874F1'));
-app.use(session({
-    secret: '59B93087-78BC-4EB9-993A-A61FC844F6C9',
-    resave: true,
-    saveUninitialized: true
-}));
-app.use(csrf());
+everyauth.debug = true;
+everyauth.twitter
+  .consumerKey(TWITTER_CONSUMER_KEY)
+  .consumerSecret(TWITTER_CONSUMER_SECRET)
+  .findOrCreateUser( function (session, accessToken, accessTokenSecret, twitterUserMetadata) {
+    var promise = this.Promise();
+    process.nextTick(function(){
+        if (twitterUserMetadata.screen_name === 'azat_co') {
+          session.user = twitterUserMetadata;
+          session.admin = true;
+        }
+        promise.fulfill(twitterUserMetadata);
+    })
+    return promise;
+    // return twitterUserMetadata
+  })
+  .redirectPath('/admin');
 
-app.use(require('less-middleware')(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(function (req, res, next) {
-    res.locals._csrf = req.csrfToken();
-    return next();
+//we need it because otherwise the session will be kept alive
+everyauth.everymodule.handleLogout(routes.user.logout);
+
+everyauth.everymodule.findUserById( function (user, callback) {
+  callback(user)
 });
-app.get('/', routes.index);
-app.all('*', function (req, res) {
-    res.status(404).send();
-})
+
+
+var app = express();
+app.locals.appTitle = "Node - React JS";
+
+app.use(function(req, res, next) {
+  if (!collections.articles || ! collections.users) return next(new Error("No collections."))
+  req.collections = collections;
+  return next();
+});
+
+
+
+// all environments
+app.set('port', process.env.PORT || 3000);
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+app.use(express.favicon());
+app.use(express.logger('dev'));
+app.use(express.json());
+app.use(express.cookieParser('3CCC4ACD-6ED1-4844-9217-82131BDCB239'));
+app.use(express.session({secret: '2C44774A-D649-4D44-9535-46E296EF984F'}))
+app.use(everyauth.middleware());
+app.use(express.urlencoded());
+app.use(express.methodOverride());
+app.use(require('stylus').middleware(__dirname + '/public'));
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(function(req, res, next) {
+  if (req.session && req.session.admin)
+    res.locals.admin = true;
+  next();
+});
+
+//authorization
+var authorize = function(req, res, next) {
+  if (req.session && req.session.admin)
+    return next();
+  else
+    return res.send(401);
+};
+
 // development only
 if ('development' == app.get('env')) {
-    app.use(errorHandler());
+  app.use(express.errorHandler());
 }
-http.createServer(app).listen(app.get('port'), function () {
-    console.log('Express server listening on port ' + app.get('port'));
-});
+
+
+app.use(app.router);
+//PAGES&ROUTES
+app.get('/', routes.index);
+app.get('/login', routes.user.login);
+app.post('/login', routes.user.authenticate); //if you use everyauth, this /logout route is overwriting by everyauth automatically, therefore we use custom/additional handleLogout
+app.get('/logout', routes.user.logout);
+app.get('/admin', authorize, routes.article.admin);
+app.get('/post', authorize, routes.article.post);
+app.post('/post', authorize, routes.article.postArticle);
+app.get('/articles/:slug', routes.article.show);
+
+//REST API ROUTES
+app.all('/api', authorize);
+app.get('/api/articles', routes.article.list)
+app.post('/api/articles', routes.article.add);
+app.put('/api/articles/:id', routes.article.edit);
+app.del('/api/articles/:id', routes.article.del);
+
+
+
+app.all('*', function(req, res) {
+  res.send(404);
+})
+
+// http.createServer(app).listen(app.get('port'), function(){
+  // console.log('Express server listening on port ' + app.get('port'));
+// });
+
+var server = http.createServer(app);
+var boot = function () {
+  server.listen(app.get('port'), function(){
+    console.info('Express server listening on port ' + app.get('port'));
+  });
+}
+var shutdown = function() {
+  server.close();
+}
+if (require.main === module) {
+  boot();
+}
+else {
+  console.info('Running app as a module')
+  exports.boot = boot;
+  exports.shutdown = shutdown;
+  exports.port = app.get('port');
+}
