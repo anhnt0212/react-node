@@ -1,10 +1,12 @@
+// config social login
 var TWITTER_CONSUMER_KEY = process.env.TWITTER_CONSUMER_KEY || 'ABC'
 var TWITTER_CONSUMER_SECRET = process.env.TWITTER_CONSUMER_SECRET || 'XYZXYZ'
-
+// create express server
 var express = require('express'),
   routes = require('./routes'),
   http = require('http'),
   path = require('path'),
+    // config db
   mongoskin = require('mongoskin'),
   dbUrl = process.env.MONGOHQ_URL || 'mongodb://@localhost:27017/blog',
   db = mongoskin.db(dbUrl, {safe: true}),
@@ -21,7 +23,7 @@ everyauth.twitter
   .findOrCreateUser( function (session, accessToken, accessTokenSecret, twitterUserMetadata) {
     var promise = this.Promise();
     process.nextTick(function(){
-        if (twitterUserMetadata.screen_name === 'azat_co') {
+        if (twitterUserMetadata.screen_name === 'anhnt') {
           session.user = twitterUserMetadata;
           session.admin = true;
         }
