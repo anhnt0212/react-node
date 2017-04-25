@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/anhnt0212/react-node.svg?branch=master)](https://travis-ci.org/anhnt0212/react-node)
 * Install express
 * Install react
 * Install nodemon for debug
