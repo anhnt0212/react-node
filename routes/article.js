@@ -81,11 +81,12 @@ exports.post = function(req, res, next) {
  */
 
 exports.postArticle = function(req, res, next) {
-  if (!req.body.title || !req.body.slug || !req.body.text ) {
-    return res.render('post', {error: "Fill title, slug and text."});
+  if (!req.body.title || !req.body.slug || !req.body.text || !req.body.description) {
+    return res.render('post', {error: "Fill title, slug and text or description"});
   }
   var article = {
     title: req.body.title,
+    description: req.body.description,
     slug: req.body.slug,
     text: req.body.text,
     published: false
