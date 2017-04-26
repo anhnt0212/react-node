@@ -8,15 +8,11 @@ var Contacts = React.createClass({
     },
     render: function () {
         return (
-            <p>
-                <span className="title">Anh Nguyen Blog</span>
-                <br />
-                <div>Copyright &copy; Anh Nguyen : {this.state.personAge}</div>
-            </p>
+            <div>
+                <p className="title">Anh Nguyen Blog</p>
+                <p>Copyright &copy; {this.state.personAge} A Clean Blog Theme by Start Bootstrap</p>
+            </div>
         );
     },
 });
-
-ReactDOM.render(
-        <Contacts name="fullName" data="web developer" age="2017"/>
-    , document.getElementById('contact'));
+ReactDOM.render(<Contacts name="fullName" data="web developer" age="2017"/>, document.getElementById('contact'));
