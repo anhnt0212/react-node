@@ -1,15 +1,19 @@
 extends layout
 
 block page 
-  - var menu = 'index'
+    - var menu = 'index'
 block content
-  if (articles.length === 0)
-    | There's no published content yet. 
-    a(href="/login") Log in
-    |  to post and publish.
-  else 
-    each article, index in articles
-      div
-        h2
-          a(href="/articles/#{article.slug}")= article.title
-          p=article.description
+    if (articles.length === 0)
+        | There's no published content yet.
+        a(href="/login") Log in
+        |  to post and publish.
+    else
+        each article, index in articles
+            .post-preview
+                a(href="/articles/#{article.slug}")
+                    h2.post-title=article.title
+                    h4.post-subtitle=article.description
+                p.post-meta
+                    | Posted by
+                    a(href='javascript:;') Admin
+                    |  on September 24, 2016
