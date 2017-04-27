@@ -89,6 +89,9 @@ exports.postArticle = function(req, res, next) {
     description: req.body.description,
     slug: req.body.slug,
     text: req.body.text,
+    created_at: new Date(),
+    updated_at: new Date(),
+    author: req.session.user,
     published: false
   };
   req.collections.articles.insert(article, function(error, articleResponse) {

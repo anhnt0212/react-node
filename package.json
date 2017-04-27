@@ -7,13 +7,14 @@
     "test": "mocha test"
   },
   "dependencies": {
+    "everyauth": "~0.4.5",
+    "expect.js": "~0.2.0",
     "express": "3.4.5",
     "jade": "*",
-    "mongoskin": "~0.6.1",
-    "stylus": "~0.40.3",
     "mocha": "~1.16.2",
-    "superagent": "~0.15.7",
-    "expect.js": "~0.2.0",
-    "everyauth": "~0.4.5"
+    "mongoskin": "~0.6.1",
+    "react-infinite-scroll-component": "^2.2.2",
+    "stylus": "~0.40.3",
+    "superagent": "~0.15.7"
   }
 }

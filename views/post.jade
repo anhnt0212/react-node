@@ -1,26 +1,29 @@
 extends layout
 block page
-  - var menu = 'post'
+    - var menu = 'post'
 block content
-  
+
     h2 Post an Article
     div= error
-    div.col-md-8
-      form(action="/post", method="POST", role="form" ,class="form-post-article",id="form-post-article")
-        div.form-group
-          label(for="title") Title
-          input#title.form-control(name="title", type="text",required="required",placeholder="JavaScript is good")
-        div.form-group
-          label(for="slug") Slug
-          input#slug.form-control(name="slug", type="text" ,required="required",readonly)
-          span.help-block This string will be used in the URL.
-        div.form-group
-            label(for="description") Description
-            input#description.form-control(name="description", type="text",required="required", placeholder="description")
-            span.help-block This description.
+    div.col-md-12
+        form(action="/post", method="POST", role="form" ,class="form-post-article",id="form-post-article")
+            div.form-group
+                label(for="title") Title
+                input#title.form-control(name="title", type="text",required="required",placeholder="JavaScript is good")
+            div.form-group
+                label(for="slug") Slug
+                input#slug.form-control(name="slug", type="text" ,required="required",readonly)
+                span.help-block This string will be used in the URL.
+            div.form-group
+                label(for="description") Description
+                textarea#description.form-control(rows="5",name="description",required="required", placeholder="description")
+                span.help-block This description.
 
-        div.form-group
-          label(for="text") Text
-          textarea#text.form-control(rows="10", name="text",required="required",class="submit-article", placeholder="Content")
-        p
-          button.btn.btn-primary(type="submit") Save
+            div.form-group
+                label(for="text") Text
+                textarea#text.form-control(rows="10", name="text",required="required",class="submit-article", placeholder="Content")
+            p
+                button.btn.btn-primary(type="submit") Save
+    script(src='https://cdn.ckeditor.com/4.6.2/standard/ckeditor.js')
+    script.
+        CKEDITOR.replace('text');

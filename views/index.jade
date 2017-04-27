@@ -8,12 +8,17 @@ block content
         a(href="/login") Log in
         |  to post and publish.
     else
-        each article, index in articles
-            .post-preview
-                a(href="/articles/#{article.slug}")
-                    h2.post-title=article.title
-                    h4.post-subtitle=article.description
-                p.post-meta
-                    | Posted by
-                    a(href='javascript:;') Admin
-                    |  on September 24, 2016
+        .list-post
+            each article, index in articles
+                .post-preview
+                    a(href="/articles/#{article.slug}")
+                        h2.post-title=article.title
+                        h4.post-subtitle=article.description
+                    p.post-meta
+                        | Posted by
+                        a(href='javascript:;') Admin
+                        |  on
+                        if(article.created_at)
+                            !{article.created_at }
+                        else
+                            | !{ new Date }
