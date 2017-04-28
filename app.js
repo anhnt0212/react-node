@@ -1,56 +1,83 @@
+require('dotenv').config();
 // config social login
 var TWITTER_CONSUMER_KEY = process.env.TWITTER_CONSUMER_KEY || 'ABC'
 var TWITTER_CONSUMER_SECRET = process.env.TWITTER_CONSUMER_SECRET || 'XYZXYZ'
+
+var FACEBOOK_APP_ID_HERE = process.env.FACEBOOK_APP_ID_HERE || 'ABC'
+var FACEBOOK_APP_SECRET_HERE = process.env.FACEBOOK_APP_SECRET_HERE || 'XYZXYZ'
+
 // create express server
 var express = require('express'),
-  routes = require('./routes'),
-  http = require('http'),
-  path = require('path'),
-    // config db
-  mongoskin = require('mongoskin'),
-  dbUrl = process.env.MONGOHQ_URL || 'mongodb://@localhost:27017/blog',
-  db = mongoskin.db(dbUrl, {safe: true}),
-  collections = {
-    articles: db.collection('articles'),
-    users: db.collection('users')
-  }
-  everyauth = require('everyauth');
+    routes = require('./routes'),
+    http = require('http'),
+    path = require('path'),
+    crypto = require('crypto'),
+    // config db with mongoskin
+    mongoskin = require('mongoskin'),
+    dbUrl = process.env.MONGOHQ_URL || 'mongodb://@localhost:27017/blog',
+    db = mongoskin.db(dbUrl, {safe: true}),
+    collections = {
+        articles: db.collection('articles'),
+        users: db.collection('users')
+    }
+everyauth = require('everyauth');
 
 everyauth.debug = true;
+
+// handle login twitter
+
 everyauth.twitter
-  .consumerKey(TWITTER_CONSUMER_KEY)
-  .consumerSecret(TWITTER_CONSUMER_SECRET)
-  .findOrCreateUser( function (session, accessToken, accessTokenSecret, twitterUserMetadata) {
-    var promise = this.Promise();
-    process.nextTick(function(){
-        if (twitterUserMetadata.screen_name === 'anhnt') {
-          session.user = twitterUserMetadata;
-          session.admin = true;
-        }
-        promise.fulfill(twitterUserMetadata);
+    .consumerKey(TWITTER_CONSUMER_KEY)
+    .consumerSecret(TWITTER_CONSUMER_SECRET)
+    .findOrCreateUser(function (session, accessToken, accessTokenSecret, twitterUserMetadata) {
+        var promise = this.Promise();
+        process.nextTick(function () {
+            if (twitterUserMetadata.screen_name === 'anhnt0212@gmail.com') {
+                session.user = twitterUserMetadata;
+                session.admin = true;
+            }
+            promise.fulfill(twitterUserMetadata);
+        })
+        return promise;
+        // return twitterUserMetadata
     })
-    return promise;
-    // return twitterUserMetadata
-  })
-  .redirectPath('/admin');
+    .redirectPath('/admin');
+
+// handle login facebook
+
+everyauth.facebook
+    .appId(FACEBOOK_APP_ID_HERE)
+    .appSecret(FACEBOOK_APP_SECRET_HERE)
+    .findOrCreateUser(function (session, accessToken, accessTokExtra, fbUserMetadata) {
+        var promise = this.Promise();
+        process.nextTick(function () {
+            if (fbUserMetadata.email === 'anhnt0212@gmail.com') {
+                session.user = fbUserMetadata;
+                session.admin = true;
+            }
+            promise.fulfill(fbUserMetadata);
+        })
+        return promise;
+        // return fbUserMetadata
+    })
+    .redirectPath('/admin');
 
 //we need it because otherwise the session will be kept alive
 everyauth.everymodule.handleLogout(routes.user.logout);
 
-everyauth.everymodule.findUserById( function (user, callback) {
-  callback(user)
+everyauth.everymodule.findUserById(function (user, callback) {
+    callback(user)
 });
 
 
 var app = express();
 app.locals.appTitle = "Node - React JS";
 
-app.use(function(req, res, next) {
-  if (!collections.articles || ! collections.users) return next(new Error("No collections."))
-  req.collections = collections;
-  return next();
+app.use(function (req, res, next) {
+    if (!collections.articles || !collections.users) return next(new Error("No collections."))
+    req.collections = collections;
+    return next();
 });
-
 
 
 // all environments
@@ -68,23 +95,23 @@ app.use(express.methodOverride());
 app.use(require('stylus').middleware(__dirname + '/public'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(function(req, res, next) {
-  if (req.session && req.session.admin)
-    res.locals.admin = true;
-  next();
+app.use(function (req, res, next) {
+    if (req.session && req.session.admin)
+        res.locals.admin = true;
+    next();
 });
 
 //authorization
-var authorize = function(req, res, next) {
-  if (req.session && req.session.admin)
-    return next();
-  else
-    return res.send(401);
+var authorize = function (req, res, next) {
+    if (req.session && req.session.admin)
+        return next();
+    else
+        return res.send(401);
 };
 
 // development only
 if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+    app.use(express.errorHandler());
 }
 
 
@@ -107,30 +134,29 @@ app.put('/api/articles/:id', routes.article.edit);
 app.del('/api/articles/:id', routes.article.del);
 
 
-
-app.all('*', function(req, res) {
-  res.send(404);
+app.all('*', function (req, res) {
+    res.send(404);
 })
 
 // http.createServer(app).listen(app.get('port'), function(){
-  // console.log('Express server listening on port ' + app.get('port'));
+// console.log('Express server listening on port ' + app.get('port'));
 // });
 
 var server = http.createServer(app);
 var boot = function () {
-  server.listen(app.get('port'), function(){
-    console.info('Express server listening on port ' + app.get('port'));
-  });
+    server.listen(app.get('port'), function () {
+        console.info('Express server listening on port ' + app.get('port'));
+    });
 }
-var shutdown = function() {
-  server.close();
+var shutdown = function () {
+    server.close();
 }
 if (require.main === module) {
-  boot();
+    boot();
 }
 else {
-  console.info('Running app as a module')
-  exports.boot = boot;
-  exports.shutdown = shutdown;
-  exports.port = app.get('port');
+    console.info('Running app as a module')
+    exports.boot = boot;
+    exports.shutdown = shutdown;
+    exports.port = app.get('port');
 }
