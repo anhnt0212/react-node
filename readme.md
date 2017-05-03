@@ -2,6 +2,7 @@
 * Install express
 * Install react
 * Install nodemon for debug
+* Create file .env  
 
  Nodemon is a utility that will monitor for any changes in your source and automatically restart your server. Perfect for development. Install it using npm.
  
@@ -17,6 +18,7 @@
  `heroku login`
 
  * Step 2
+ 
  `heroku create [app_name]`
  
  * Step 3

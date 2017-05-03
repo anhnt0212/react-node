@@ -72,6 +72,7 @@ everyauth.everymodule.findUserById(function (user, callback) {
 
 var app = express();
 app.locals.appTitle = "Node - React JS";
+app.locals.appDescription = "Blog using Javascript";
 
 app.use(function (req, res, next) {
     if (!collections.articles || !collections.users) return next(new Error("No collections."))
